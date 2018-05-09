@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Baking app</string>
     <string name="action_update">Update</string>
+    <string name="database_updated">Database updated</string>
+    <string name="heart_description">Heart</string>
+    <string name="msg_about_filling_db">There are no recipes in local db. Do you want to load it from internet?</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="no_internet_connection">No internet connection</string>
 </resources>

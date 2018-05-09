@@ -6,17 +6,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.Arrays;
+import com.example.alex.bakingapp.json.RecipeJson;
+
 import java.util.List;
 
 public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipeViewHolder> {
 
-    List<String> fakeData = Arrays.asList("recipe 1", "recipe 2", "recipe 3");
+    private List<RecipeJson> mRecipes;
 
-    public RecipesAdapter() {
+    public RecipesAdapter(List<RecipeJson> recipes) {
         super();
+        mRecipes = recipes;
     }
 
     @NonNull
@@ -29,22 +32,34 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipeVi
 
     @Override
     public void onBindViewHolder(@NonNull RecipeViewHolder holder, int position) {
-        holder.mTextView.setText(fakeData.get(position));
+        RecipeJson recipe = mRecipes.get(position);
+        holder.mNameTv.setText(recipe.name);
+        if (recipe.isFavorite) {
+            holder.mIsFavoriteIv.setVisibility(View.VISIBLE);
+        } else {
+            holder.mIsFavoriteIv.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return fakeData.size();
+        return mRecipes == null ? 0 : mRecipes.size();
     }
 
+    public void setRecipes(List<RecipeJson> recipes) {
+        mRecipes = recipes;
+        notifyDataSetChanged();
+    }
 
     class RecipeViewHolder extends RecyclerView.ViewHolder{
 
-        TextView mTextView;
+        TextView mNameTv;
+        ImageView mIsFavoriteIv;
 
         public RecipeViewHolder(View itemView) {
             super(itemView);
-            mTextView = itemView.findViewById(R.id.recipe_name_tv);
+            mNameTv = itemView.findViewById(R.id.recipe_name_tv);
+            mIsFavoriteIv = itemView.findViewById(R.id.is_favorite_iv);
         }
 
     }

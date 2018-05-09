@@ -10,6 +10,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="Test text"
-            android:id="@+id/recipe_name_tv"/>
+            android:id="@+id/recipe_name_tv"
+            style="@style/TextAppearance.AppCompat.Large"
+            android:gravity="center"
+            android:textAllCaps="true"
+            android:padding="@dimen/std_margin"/>
+
+        <ImageView
+            android:id="@+id/is_favorite_iv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_favorite_filled"
+            android:layout_gravity="end|center_vertical"
+            android:paddingEnd="@dimen/std_margin"
+            android:contentDescription="@string/heart_description"/>
 
     </android.support.v7.widget.CardView>

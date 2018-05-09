@@ -1,20 +1,83 @@
 package com.example.alex.bakingapp;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.alex.bakingapp.db.UtilsDb;
+import com.example.alex.bakingapp.json.RecipeJson;
 
-    private RecyclerView mRecipesRv;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<List<RecipeJson>> ,
+        DialogAboutFillingDb.DialogAboutFillingDbListener {
+
+    public static String TAG = "MainActivityTag";
+    private static int LOADER_RECIPES_ID = 1;
+
     private RecipesAdapter mRecipesAdapter;
+
+    private BroadcastReceiver mReceiver;
+
+
+    //************ Loader callbacks ****************//
+
+    @Override
+    @NonNull
+    public Loader<List<RecipeJson>> onCreateLoader(int id, Bundle args) {
+        return new RecipesLoader(getApplicationContext());
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<List<RecipeJson>> loader, List<RecipeJson> data) {
+        Log.d(TAG, "onLoadFinished: ");
+        mRecipesAdapter.setRecipes(data);
+        if (!((RecipesLoader) loader).mAskedAboutFillingDb && (data == null || data.size() == 0)) {
+            ((RecipesLoader) loader).mAskedAboutFillingDb = true;
+            showDialogAboutFillingDb();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<List<RecipeJson>> loader) {
+    }
+
+    //************ End loader callbacks ****************//
+
+    //************ Loaders ****************//
+
+    private static class RecipesLoader extends AsyncTaskLoader<List<RecipeJson>> {
+
+        public boolean mAskedAboutFillingDb = false;
+
+        RecipesLoader(Context appContext) {
+            super(appContext);
+        }
+
+        @Override
+        public List<RecipeJson> loadInBackground() {
+            return UtilsDb.getRecipes(getContext());
+        }
+    }
+
+    //************ End loaders****************//
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,11 +86,26 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mRecipesRv = findViewById(R.id.recipes_rv);
-        mRecipesRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        mRecipesAdapter = new RecipesAdapter();
-        mRecipesRv.setAdapter(mRecipesAdapter);
+        RecyclerView recipesRv = findViewById(R.id.recipes_rv);
+        recipesRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        mRecipesAdapter = new RecipesAdapter(null);
+        recipesRv.setAdapter(mRecipesAdapter);
 
+        //updating adapter by loaders
+        Loader loader = getSupportLoaderManager().initLoader(LOADER_RECIPES_ID, null, this);
+        if (savedInstanceState == null) loader.forceLoad();
+
+        //Receive broadcast from UpdateRecipesService
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Toast.makeText(MainActivity.this, R.string.database_updated, Toast.LENGTH_LONG).show();
+                Loader loader = getSupportLoaderManager().getLoader(LOADER_RECIPES_ID);
+                if (loader != null) loader.forceLoad();
+            }
+        };
+        IntentFilter intentFilter = new IntentFilter(UpdateRecipesService.UPDATE_RECIPES_SERVICE_FINISHED);
+        registerReceiver(mReceiver, intentFilter);
     }
 
     @Override
@@ -39,14 +117,40 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_update) {
+            updateRecipes();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    //Read recipes from http and save to db
+    public void updateRecipes() {
+        if (NetUtils.isConnected(this)) {
+            Intent intent = new Intent(this, UpdateRecipesService.class);
+            startService(intent);
+        } else {
+            Snackbar.make(findViewById(R.id.coordinator_layout), R.string.no_internet_connection, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
+    }
+
+    private void showDialogAboutFillingDb() {
+        DialogFragment dialogFragment = new DialogAboutFillingDb();
+        dialogFragment.show(getSupportFragmentManager(), "DialogAboutFillingDb");
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        updateRecipes();
+    }
+
 }
+
