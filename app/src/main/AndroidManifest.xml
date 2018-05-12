@@ -21,8 +21,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".UpdateRecipesService" android:exported="false">
-        </service>
+
+        <service
+            android:name=".UpdateRecipesService"
+            android:exported="false" />
+
+        <activity
+            android:name=".StepsActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".StepActivity"
+            android:parentActivityName=".StepsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

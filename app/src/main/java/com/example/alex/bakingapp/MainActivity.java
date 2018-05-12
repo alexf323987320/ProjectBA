@@ -12,12 +12,14 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.alex.bakingapp.db.UtilsDb;
@@ -27,7 +29,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<List<RecipeJson>> ,
-        DialogAboutFillingDb.DialogAboutFillingDbListener {
+        DialogAboutFillingDb.RespondListener,
+        RecipesAdapter.OnClickListener
+{
 
     public static String TAG = "MainActivityTag";
     private static int LOADER_RECIPES_ID = 1;
@@ -87,8 +91,14 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         RecyclerView recipesRv = findViewById(R.id.recipes_rv);
-        recipesRv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        mRecipesAdapter = new RecipesAdapter(null);
+        RecyclerView.LayoutManager layout = null;
+        if (getResources().getBoolean(R.bool.isTablet)) {
+            layout = new GridLayoutManager(this, 3);
+        } else {
+            layout = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        }
+        recipesRv.setLayoutManager(layout);
+        mRecipesAdapter = new RecipesAdapter(null, this);
         recipesRv.setAdapter(mRecipesAdapter);
 
         //updating adapter by loaders
@@ -152,5 +162,12 @@ public class MainActivity extends AppCompatActivity implements
         updateRecipes();
     }
 
+    //Recycler view click
+    @Override
+    public void OnClick(RecipeJson recipeJson) {
+        Intent intent = new Intent(this, StepsActivity.class);
+        intent.putExtra(StepsActivity.RECIPE_EXTRA_ID, recipeJson);
+        startActivity(intent);
+    }
 }
 

@@ -11,18 +11,18 @@ import android.support.v7.app.AlertDialog;
 //as opposed to AlertDialog this dialog does not disappear on rotation
 public class DialogAboutFillingDb extends DialogFragment {
 
-    public interface DialogAboutFillingDbListener {
+    public interface RespondListener {
         void onDialogPositiveClick(DialogFragment dialog);
     }
 
-    DialogAboutFillingDbListener mListener;
+    RespondListener mListener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         // Verify that the host activity implements the callback interface
         try {
-            mListener = (DialogAboutFillingDbListener) context;
+            mListener = (RespondListener) context;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(context.toString() + " must implement DialogAboutFillingDbListener");

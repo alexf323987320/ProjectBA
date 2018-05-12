@@ -12,32 +12,49 @@ import android.widget.TextView;
 import com.example.alex.bakingapp.json.RecipeJson;
 
 import java.util.List;
+import java.util.Random;
 
 public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipeViewHolder> {
 
     private List<RecipeJson> mRecipes;
 
-    public RecipesAdapter(List<RecipeJson> recipes) {
+    RecipesAdapter(List<RecipeJson> recipes, OnClickListener onClickListener) {
         super();
         mRecipes = recipes;
+        mOnClickListener = onClickListener;
     }
+
+    private OnClickListener mOnClickListener;
+
+    public interface OnClickListener {
+        void OnClick(RecipeJson recipeJson);
+    }
+
 
     @NonNull
     @Override
     public RecipeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
-        View view = LayoutInflater.from(context).inflate(R.layout.recipe_item_view, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_view_recipe, parent, false);
         return new RecipeViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecipeViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecipeViewHolder holder, final int position) {
         RecipeJson recipe = mRecipes.get(position);
         holder.mNameTv.setText(recipe.name);
         if (recipe.isFavorite) {
             holder.mIsFavoriteIv.setVisibility(View.VISIBLE);
         } else {
             holder.mIsFavoriteIv.setVisibility(View.INVISIBLE);
+        }
+        if (mOnClickListener != null) {
+            holder.mNameTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnClickListener.OnClick(mRecipes.get(position));
+                }
+            });
         }
     }
 
@@ -56,7 +73,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipeVi
         TextView mNameTv;
         ImageView mIsFavoriteIv;
 
-        public RecipeViewHolder(View itemView) {
+        RecipeViewHolder(View itemView) {
             super(itemView);
             mNameTv = itemView.findViewById(R.id.recipe_name_tv);
             mIsFavoriteIv = itemView.findViewById(R.id.is_favorite_iv);

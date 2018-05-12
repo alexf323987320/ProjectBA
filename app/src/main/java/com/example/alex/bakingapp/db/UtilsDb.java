@@ -65,18 +65,13 @@ public class UtilsDb {
     public static List<RecipeJson> getRecipes(Context appContext) {
         RecipesOpenHelper recipesOpenHelper = new RecipesOpenHelper(appContext);
         SQLiteDatabase db = recipesOpenHelper.getReadableDatabase();
-//        String sql = "SELECT * FROM " + RecipesTable.TABLE_NAME + "\n" +
-//                "INNER JOIN " + IngredientsTable.TABLE_NAME + " ON \n" +
-//                RecipesTable.TABLE_NAME + "." + RecipesTable.COLUMN_ID + " = \n" +
-//                IngredientsTable.TABLE_NAME + "." + IngredientsTable.COLUMN_RECIPE_ID + "\n" +
-//                "INNER JOIN " + StepsTable.TABLE_NAME + " ON \n" +
-//                RecipesTable.TABLE_NAME + "." + RecipesTable.COLUMN_ID + " = \n" +
-//                StepsTable.TABLE_NAME + "." + StepsTable.COLUMN_RECIPE_ID;
-//        Cursor cursor = db.rawQuery(sql, null);
+
         String order = RecipesTable.COLUMN_ID;
         Cursor cursor1 = db.query(RecipesTable.TABLE_NAME, null, null, null, null, null, order);
+
         order = IngredientsTable.COLUMN_RECIPE_ID + "," + IngredientsTable.COLUMN_INGREDIENT;
         Cursor cursor2 = db.query(IngredientsTable.TABLE_NAME, null, null, null, null, null, order);
+
         order = StepsTable.COLUMN_RECIPE_ID + "," + StepsTable.COLUMN_ID;
         Cursor cursor3 = db.query(StepsTable.TABLE_NAME, null, null, null, null, null, order);
 
@@ -102,14 +97,16 @@ public class UtilsDb {
             recipe.steps = new ArrayList<>();
             if (cursor3.moveToFirst()) {
                 do {
-                    StepJson step = new StepJson();
-                    step.id = cursor3.getInt(cursor3.getColumnIndex(StepsTable.COLUMN_ID));
-                    step.description = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_DESCRIPTION));
-                    step.shortDescription = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_SHORT_DESCRIPTION));
-                    step.thumbnailURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_THUMBNAIL_URL));
-                    step.videoURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_THUMBNAIL_URL));
-                    recipe.steps.add(step);
-                } while (cursor3.moveToNext());
+                    if (recipe.id == cursor3.getInt(cursor3.getColumnIndex(StepsTable.COLUMN_RECIPE_ID))) {
+                        StepJson step = new StepJson();
+                        step.id = cursor3.getInt(cursor3.getColumnIndex(StepsTable.COLUMN_ID));
+                        step.description = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_DESCRIPTION));
+                        step.shortDescription = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_SHORT_DESCRIPTION));
+                        step.thumbnailURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_THUMBNAIL_URL));
+                        step.videoURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_THUMBNAIL_URL));
+                        recipe.steps.add(step);
+                    }
+                } while (cursor3.moveToNext()) ;
             }
             recipes.add(recipe);
         }
@@ -121,18 +118,7 @@ public class UtilsDb {
         return recipes;
     }
 
-    //-1 if not found
-//    public static int getFavoriteId(Context appContext) {
-//        SQLiteDatabase db = new RecipesOpenHelper(appContext).getReadableDatabase();
-//        Cursor cursor = db.query(RecipesTable.TABLE_NAME, null, RecipesTable.COLUMN_IS_FAVORITE, null, null, null, null);
-//        int favId = -1;
-//        if (cursor.moveToFirst()) {
-//            cursor.getInt(cursor.getColumnIndex(RecipesTable.COLUMN_ID));
-//        }
-//        cursor.close();
-//        return favId;
-//    }
-
+    //change the favorite recipe
     public static void updateFavorite(Context appContext, int newFavoriteId) {
         SQLiteDatabase db = new RecipesOpenHelper(appContext).getReadableDatabase();
         db.beginTransaction();
