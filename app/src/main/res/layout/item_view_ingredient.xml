@@ -13,5 +13,5 @@
         android:layout_height="wrap_content"
         tools:text="Test text"
         android:id="@+id/name_tv"
-        style="@style/TextAppearance.AppCompat.Medium" />
+        style="@style/IngredientText" />
 </LinearLayout>

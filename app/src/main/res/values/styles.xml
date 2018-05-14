@@ -21,4 +21,27 @@
         <item name="android:background">@color/black_overlay</item>
     </style>
 
+    <style name="StepText" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:padding">@dimen/std_margin</item>
+    </style>
+
+    <style name="StepBigText" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:padding">@dimen/std_margin</item>
+    </style>
+
+    <style name="IngredientText" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="CaptionText" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:background">@color/colorPrimaryLight</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/std_margin</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

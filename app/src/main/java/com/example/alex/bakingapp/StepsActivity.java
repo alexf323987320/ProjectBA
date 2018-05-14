@@ -1,9 +1,12 @@
 package com.example.alex.bakingapp;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.view.MenuItem;
@@ -68,9 +71,18 @@ public class StepsActivity extends AppCompatActivity implements StepsAdapter.OnC
     }
 
     private void setFabImage() {
+
+        //Workaround for lollipop
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1) {
+            return;
+        }
+
         if (mRecipeJson.isFavorite) {
+            //mFab.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_filled, getTheme()));
             mFab.setImageResource(R.drawable.ic_favorite_filled);
         } else {
+            //mFab.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_border, getTheme()));
+            //mFab.setImageDrawable(getDrawable(R.drawable.ic_favorite_border));
             mFab.setImageResource(R.drawable.ic_favorite_border);
         }
     }

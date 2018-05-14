@@ -103,7 +103,7 @@ public class UtilsDb {
                         step.description = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_DESCRIPTION));
                         step.shortDescription = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_SHORT_DESCRIPTION));
                         step.thumbnailURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_THUMBNAIL_URL));
-                        step.videoURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_THUMBNAIL_URL));
+                        step.videoURL = cursor3.getString(cursor3.getColumnIndex(StepsTable.COLUMN_VIDEO_URL));
                         recipe.steps.add(step);
                     }
                 } while (cursor3.moveToNext()) ;

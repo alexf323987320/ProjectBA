@@ -11,7 +11,6 @@
             android:layout_height="wrap_content"
             tools:text="Test text"
             android:id="@+id/name_tv"
-            style="@style/TextAppearance.AppCompat.Large"
-            android:padding="@dimen/std_margin"/>
+            style="@style/StepBigText"/>
 
     </android.support.v7.widget.CardView>

@@ -33,7 +33,7 @@
             android:layout_height="match_parent" />
         <FrameLayout
             android:id="@+id/step_frame"
-            android:layout_weight="3"
+            android:layout_weight="2"
             android:layout_width="0dp"
             android:layout_height="match_parent"/>
     </LinearLayout>
@@ -45,7 +45,7 @@
         android:layout_margin="@dimen/big_margin"
         app:layout_anchor="@+id/step_frame"
         app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_favorite_filled"
+        app:srcCompat="@drawable/ic_help"
         app:backgroundTint="@android:color/white" />
 
 </android.support.design.widget.CoordinatorLayout>

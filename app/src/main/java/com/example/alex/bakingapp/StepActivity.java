@@ -36,7 +36,7 @@ public class StepActivity extends AppCompatActivity {
             StepFragment fragment = new StepFragment();
             fragment.setArguments(getIntent().getExtras());
             getSupportFragmentManager().beginTransaction().add(R.id.step_frame, fragment).commit();
-        }
+        };
     }
 
     @Override
