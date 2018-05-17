@@ -19,7 +19,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.alex.bakingapp.db.UtilsDb;
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public List<RecipeJson> loadInBackground() {
-            return UtilsDb.getRecipes(getContext());
+            return UtilsDb.getRecipes(getContext(), null);
         }
     }
 
@@ -166,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void OnClick(RecipeJson recipeJson) {
         Intent intent = new Intent(this, StepsActivity.class);
-        intent.putExtra(StepsActivity.RECIPE_EXTRA_ID, recipeJson);
+        intent.putExtra(StepsActivity.RECIPE_KEY, recipeJson);
         startActivity(intent);
     }
 }

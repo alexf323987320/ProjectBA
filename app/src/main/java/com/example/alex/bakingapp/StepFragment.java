@@ -43,11 +43,17 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
 
+import java.util.List;
+
 public class StepFragment extends Fragment{
 
-    private static final String PLAYER_POSITION_KEY = "player_position";
-    private static final String PLAYER_IS_PLAYING_KEY = "player_playing";
-    private StepJson mStepJson;
+    public static final String STEP_KEY = "step";
+    private static final String PLAYER_CURRENT_POSITION_KEY = "player_current_position";
+    public static final String PLAYER_PLAY_WHEN_READY_KEY = "player_play_when_ready";
+    public static final String ARG_PLAY_WHEN_READY_KEY = "arg_play_when_ready";
+
+    private StepJson mStepJsonArg;
+    private boolean mPlayWhenReadyArg;
     private boolean mIsLand;
     private boolean mIsTablet;
     private SimpleExoPlayer mPlayer;
@@ -58,9 +64,10 @@ public class StepFragment extends Fragment{
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mStepJson = (StepJson) arguments.getSerializable(StepActivity.STEP_EXTRA_ID);
+            mStepJsonArg = (StepJson) arguments.getSerializable(STEP_KEY);
+            mPlayWhenReadyArg = arguments.getBoolean(ARG_PLAY_WHEN_READY_KEY, false);
         }
-        if (mStepJson == null) {
+        if (mStepJsonArg == null) {
             throw new IllegalArgumentException("Argument for step fragment is not set");
         }
 
@@ -81,7 +88,7 @@ public class StepFragment extends Fragment{
         } else {
             //fill the text data
             TextView descriptionTv = rootView.findViewById(R.id.description_tv);
-            descriptionTv.setText(mStepJson.description);
+            descriptionTv.setText(mStepJsonArg.description);
         }
 
         return rootView;
@@ -109,34 +116,22 @@ public class StepFragment extends Fragment{
         });
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mIsLand && !mIsTablet) {
-            hideSystemBars();
-        }
-    }
-
-    private void hideSystemBars() {
+    public void hideSystemBars() {
         View decorView = getActivity().getWindow().getDecorView();
         decorView.setSystemUiVisibility(
                 // Set the content to appear under the system bars so that the
                 // content doesn't resize when the system bars hide and show.
                 //View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 // Hide the nav bar and status bar
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        //((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //check on common "error" cases
-        if (!NetUtils.isConnected(getActivity())) {
-            Toast.makeText(getActivity(), getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show();
-        } else if (mStepJson.videoURL.isEmpty()) {
-            Toast.makeText(getActivity(), getString(R.string.video_not_available), Toast.LENGTH_LONG).show();
-        } else {
+        //start playing on creation and argument mPlayWhenReadyArg = true or on rotation when player was active
+        if (savedInstanceState == null && mPlayWhenReadyArg ||
+                savedInstanceState != null && savedInstanceState.containsKey(PLAYER_CURRENT_POSITION_KEY)) {
             epStart(savedInstanceState);
         }
     }
@@ -151,14 +146,42 @@ public class StepFragment extends Fragment{
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mPlayer != null) {
-            outState.putLong(PLAYER_POSITION_KEY, mPlayer.getCurrentPosition());
-            outState.putBoolean(PLAYER_IS_PLAYING_KEY, mPlayer.getPlayWhenReady());
+            outState.putLong(PLAYER_CURRENT_POSITION_KEY, mPlayer.getCurrentPosition());
+            outState.putBoolean(PLAYER_PLAY_WHEN_READY_KEY, mPlayer.getPlayWhenReady());
         }
     }
 
+    //Called from viewPager onPageSelected. Stops video on all fragments and starts on current.
+    public static void onPageSelected(List<Fragment> fragments, StepJson stepJson) {
+        StepFragment targetFragment = null;
+        for (Fragment fragment: fragments) {
+            if (fragment instanceof StepFragment) {
+                if (((StepFragment) fragment).mStepJsonArg == stepJson) {
+                    targetFragment = (StepFragment) fragment;
+                }
+                ((StepFragment) fragment).epDestroy();
+            }
+        }
+        if (targetFragment != null) {
+            targetFragment.epStart(null);
+        }
+    }
+
+
 //***************ExoPlayer***************
 
-    private void epStart(Bundle savedInstanceState) {
+    private void epStart(@Nullable Bundle savedInstanceState) {
+
+        //if no video file - do not initialize at all
+        if (mStepJsonArg.videoURL.isEmpty()) {
+            Toast.makeText(getActivity(), getString(R.string.video_not_available), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        //enter full screen mode
+        if (mIsLand && !mIsTablet) {
+            hideSystemBars();
+        }
 
         // Measures bandwidth during playback. Can be null if not required.
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -170,7 +193,7 @@ public class StepFragment extends Fragment{
         mPlayerView.setBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.black));
         mPlayerView.setPlayer(mPlayer);
 
-        Uri uri = Uri.parse(mStepJson.videoURL);
+        Uri uri = Uri.parse(mStepJsonArg.videoURL);
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getActivity(), getString(R.string.app_name)));
         // This is the MediaSource representing the media to be played.
@@ -187,18 +210,14 @@ public class StepFragment extends Fragment{
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 super.onPlayerError(error);
-                Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), error.getCause().getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(PLAYER_POSITION_KEY)) {
-            mPlayer.seekTo(savedInstanceState.getLong(PLAYER_POSITION_KEY));
+        if (savedInstanceState != null && savedInstanceState.containsKey(PLAYER_CURRENT_POSITION_KEY)) {
+            mPlayer.seekTo(savedInstanceState.getLong(PLAYER_CURRENT_POSITION_KEY));
         }
-        if (savedInstanceState == null ||
-                (savedInstanceState.containsKey(PLAYER_IS_PLAYING_KEY) && savedInstanceState.getBoolean(PLAYER_IS_PLAYING_KEY))) {
-            mPlayer.setPlayWhenReady(true);
-        }
-
+        mPlayer.setPlayWhenReady(savedInstanceState == null || savedInstanceState.getBoolean(PLAYER_PLAY_WHEN_READY_KEY, false));
     }
 
     private void epDestroy() {

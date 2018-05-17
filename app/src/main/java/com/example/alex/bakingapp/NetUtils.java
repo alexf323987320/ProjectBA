@@ -11,7 +11,6 @@ import static android.content.Context.CONNECTIVITY_SERVICE;
 class NetUtils {
 
     public static boolean isConnected(Context context) {
-        boolean result;
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
         if (cm == null) return false;
         NetworkInfo ni = cm.getActiveNetworkInfo();

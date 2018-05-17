@@ -2,26 +2,44 @@ package com.example.alex.bakingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.NavUtils;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 
+import com.example.alex.bakingapp.json.RecipeJson;
 import com.example.alex.bakingapp.json.StepJson;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class StepActivity extends AppCompatActivity {
 
-    public static final String STEP_EXTRA_ID = "step";
-    public StepJson mStepJson;
+    public static final String STEP_NUMBER_KEY = "step_number";
+    public static final String CURRENT_PAGE_KEY = "current_page";
+    public static final int WRONG_STEP_NUMBER = -1000;
+
+    private RecipeJson mRecipeJson;
+    private int mStepNumber;
+    private ViewPager mViewPager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -30,13 +48,40 @@ public class StepActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        mStepJson = (StepJson) getIntent().getSerializableExtra(STEP_EXTRA_ID);
+        mRecipeJson = (RecipeJson) getIntent().getSerializableExtra(StepsActivity.RECIPE_KEY);
+        mStepNumber = getIntent().getIntExtra(STEP_NUMBER_KEY, WRONG_STEP_NUMBER);
+        if (mRecipeJson == null || mStepNumber == WRONG_STEP_NUMBER) {
+            throw new IllegalArgumentException("Wrong StepActivity parameters");
+        }
 
+        mViewPager = findViewById(R.id.view_pager);
+        //adapter for mViewPager
+        PagerAdapter adapter = new StepPagerAdapter(getSupportFragmentManager(), mRecipeJson, savedInstanceState == null);
+        mViewPager.setAdapter(adapter);
+
+        //positioning viewPager only for newly created activity, if rotated - restored automatically
         if (savedInstanceState == null) {
-            StepFragment fragment = new StepFragment();
-            fragment.setArguments(getIntent().getExtras());
-            getSupportFragmentManager().beginTransaction().add(R.id.step_frame, fragment).commit();
-        };
+            mViewPager.setCurrentItem(mStepNumber);
+        }
+
+        //reaction on changing page
+        //onPageSelected not triggered on first creation and on rotation if savedcurrentpage==0
+        //and vice versa triggered on manual changing page and on rotation if savedcurrentpage!=0
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            Boolean mFirstCall = true;
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            @Override
+            public void onPageSelected(int position) {
+                boolean pageIsRestoringFromRotation = mFirstCall && savedInstanceState != null && position == savedInstanceState.getInt(CURRENT_PAGE_KEY);
+                mFirstCall = false;
+                if (!pageIsRestoringFromRotation) {
+                    StepFragment.onPageSelected(getSupportFragmentManager().getFragments(), mRecipeJson.steps.get(position));
+                }
+            }
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
     }
 
     @Override
@@ -50,4 +95,43 @@ public class StepActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CURRENT_PAGE_KEY, mViewPager.getCurrentItem());
+    }
+
+    //***********StepPagerAdapter*******************
+    private class StepPagerAdapter extends FragmentPagerAdapter{
+
+        private RecipeJson mRecipeJson;
+        private boolean mCreatedForTheFirstTime;
+
+        StepPagerAdapter(FragmentManager fm, RecipeJson recipeJson, boolean createdForTheFirstTime) {
+            super(fm);
+            mRecipeJson = recipeJson;
+            mCreatedForTheFirstTime = createdForTheFirstTime;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            StepFragment fragment = new StepFragment();
+            Bundle args = new Bundle();
+            args.putSerializable(StepFragment.STEP_KEY, mRecipeJson.steps.get(position));
+            //first fragment
+            if (mCreatedForTheFirstTime) {
+                mCreatedForTheFirstTime = false;
+                args.putBoolean(StepFragment.ARG_PLAY_WHEN_READY_KEY, true);
+            }
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return mRecipeJson == null ? 0 : mRecipeJson.steps.size();
+        }
+    }
+    //***********End*StepPagerAdapter*******************
 }

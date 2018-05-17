@@ -35,7 +35,7 @@
         android:layout_margin="@dimen/big_margin"
         app:layout_anchor="@+id/steps_fragment"
         app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_help"
+        app:srcCompat="@drawable/ic_favorite_filled"
         app:backgroundTint="@android:color/white"
         app:fabSize="mini" />
 

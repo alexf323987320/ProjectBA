@@ -1,5 +1,6 @@
 package com.example.alex.bakingapp.db;
 
+import android.appwidget.AppWidgetManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
+import com.example.alex.bakingapp.IngredientsWidget;
 import com.example.alex.bakingapp.UpdateRecipesService;
 import com.example.alex.bakingapp.json.IngredientJson;
 import com.example.alex.bakingapp.json.RecipeJson;
@@ -60,14 +62,16 @@ public class UtilsDb {
         } finally {
             db.endTransaction();
         }
+        //update widget
+        IngredientsWidget.updateWidgets(appContext, null, null);
     }
 
-    public static List<RecipeJson> getRecipes(Context appContext) {
+    public static List<RecipeJson> getRecipes(Context appContext, @Nullable String recipeSelection) {
         RecipesOpenHelper recipesOpenHelper = new RecipesOpenHelper(appContext);
         SQLiteDatabase db = recipesOpenHelper.getReadableDatabase();
 
         String order = RecipesTable.COLUMN_ID;
-        Cursor cursor1 = db.query(RecipesTable.TABLE_NAME, null, null, null, null, null, order);
+        Cursor cursor1 = db.query(RecipesTable.TABLE_NAME, null, recipeSelection, null, null, null, order);
 
         order = IngredientsTable.COLUMN_RECIPE_ID + "," + IngredientsTable.COLUMN_INGREDIENT;
         Cursor cursor2 = db.query(IngredientsTable.TABLE_NAME, null, null, null, null, null, order);
@@ -120,7 +124,7 @@ public class UtilsDb {
 
     //change the favorite recipe
     public static void updateFavorite(Context appContext, int newFavoriteId) {
-        SQLiteDatabase db = new RecipesOpenHelper(appContext).getReadableDatabase();
+        SQLiteDatabase db = new RecipesOpenHelper(appContext).getWritableDatabase();
         db.beginTransaction();
         ContentValues cv = new ContentValues();
         cv.put(RecipesTable.COLUMN_IS_FAVORITE, false);
@@ -132,5 +136,8 @@ public class UtilsDb {
         //broadcast about finishing
         Intent intent1 = new Intent(UpdateRecipesService.UPDATE_RECIPES_SERVICE_FINISHED);
         appContext.sendBroadcast(intent1);
+        //update widget
+        IngredientsWidget.updateWidgets(appContext, null, null);
     }
+
 }

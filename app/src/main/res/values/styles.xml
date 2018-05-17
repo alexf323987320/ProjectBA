@@ -34,6 +34,9 @@
     <style name="IngredientText" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textColor">@android:color/black</item>
     </style>
+    <style name="IngredientTextLight" parent="IngredientText">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 
     <style name="CaptionText" parent="TextAppearance.AppCompat.Large">
         <item name="android:textColor">@android:color/black</item>
@@ -42,6 +45,9 @@
         <item name="android:padding">@dimen/std_margin</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
+    </style>
+    <style name="CaptionTextLight" parent="CaptionText">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>
