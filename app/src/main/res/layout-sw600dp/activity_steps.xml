@@ -7,7 +7,6 @@
     tools:context=".StepsActivity">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.NoActionBar.AppBarOverlay">
@@ -24,13 +23,15 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:baselineAligned="false">
         <fragment
             android:id="@+id/steps_fragment"
             android:name="com.example.alex.bakingapp.StepsFragment"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent" />
+
         <FrameLayout
             android:id="@+id/step_frame"
             android:layout_weight="2"

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
@@ -78,6 +79,18 @@ public class MainActivity extends AppCompatActivity implements
         public List<RecipeJson> loadInBackground() {
             return UtilsDb.getRecipes(getContext(), null);
         }
+
+        @Override
+        protected void onForceLoad() {
+            BackingCountingIdlingResource.incrementCountingIdlingResource();
+            super.onForceLoad();
+        }
+
+        @Override
+        public void deliverResult(@Nullable List<RecipeJson> data) {
+            BackingCountingIdlingResource.decrementCountingIdlingResource();
+            super.deliverResult(data);
+        }
     }
 
     //************ End loaders****************//
@@ -86,11 +99,11 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         RecyclerView recipesRv = findViewById(R.id.recipes_rv);
-        RecyclerView.LayoutManager layout = null;
+        RecyclerView.LayoutManager layout;
         if (getResources().getBoolean(R.bool.isTablet)) {
             layout = new GridLayoutManager(this, 3);
         } else {
@@ -157,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    public void onDialogPositiveClick() {
         updateRecipes();
     }
 

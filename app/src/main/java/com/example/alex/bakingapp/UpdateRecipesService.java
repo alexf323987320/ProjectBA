@@ -2,9 +2,7 @@ package com.example.alex.bakingapp;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.example.alex.bakingapp.db.UtilsDb;
 import com.example.alex.bakingapp.json.RecipeJson;
@@ -23,12 +21,28 @@ public class UpdateRecipesService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(TAG, "onHandleIntent: ");
         List<RecipeJson> recipes = UtilsJson.getRecipes();
+
+        //sleep for testing purpose
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         if (recipes == null) return;
         UtilsDb.saveRecipes(getApplicationContext(), recipes);
         //broadcast about finishing
         Intent intent1 = new Intent(UPDATE_RECIPES_SERVICE_FINISHED);
         sendBroadcast(intent1);
+        BackingCountingIdlingResource.decrementCountingIdlingResource();
     }
+
+
+    @Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        BackingCountingIdlingResource.incrementCountingIdlingResource();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
 }

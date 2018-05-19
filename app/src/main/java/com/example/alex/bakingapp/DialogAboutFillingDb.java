@@ -12,7 +12,7 @@ import android.support.v7.app.AlertDialog;
 public class DialogAboutFillingDb extends DialogFragment {
 
     public interface RespondListener {
-        void onDialogPositiveClick(DialogFragment dialog);
+        void onDialogPositiveClick();
     }
 
     RespondListener mListener;
@@ -32,15 +32,14 @@ public class DialogAboutFillingDb extends DialogFragment {
     @Override
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog alertDialog = new AlertDialog.Builder(getContext())
+        return new AlertDialog.Builder(getContext())
                 .setMessage(R.string.msg_about_filling_db)
                 .setNegativeButton(R.string.no, null)
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mListener.onDialogPositiveClick(DialogAboutFillingDb.this);
+                        mListener.onDialogPositiveClick();
                     }
                 }).create();
-        return alertDialog;
     }
 }

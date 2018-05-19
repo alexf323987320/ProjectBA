@@ -16,7 +16,7 @@ public class IngredientsWidgetService extends RemoteViewsService {
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new ListRemoteViewsFactory(getApplicationContext(), intent);
+        return new ListRemoteViewsFactory(getApplicationContext());
     }
 
     //remote adapter for the list
@@ -25,7 +25,7 @@ public class IngredientsWidgetService extends RemoteViewsService {
         Context mContext;
         RecipeJson mRecipe;
 
-        ListRemoteViewsFactory(Context context, Intent intent) {
+        ListRemoteViewsFactory(Context context) {
             mContext = context;
         }
 

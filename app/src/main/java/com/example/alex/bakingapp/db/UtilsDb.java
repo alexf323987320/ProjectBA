@@ -1,6 +1,5 @@
 package com.example.alex.bakingapp.db;
 
-import android.appwidget.AppWidgetManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -140,4 +139,17 @@ public class UtilsDb {
         IngredientsWidget.updateWidgets(appContext, null, null);
     }
 
+    public static void deleteAllRecipes(Context appContext) {
+        RecipesOpenHelper recipesOpenHelper = new RecipesOpenHelper(appContext);
+        SQLiteDatabase db = recipesOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.delete(RecipesTable.TABLE_NAME, null, null);
+            db.delete(StepsTable.TABLE_NAME, null, null);
+            db.delete(IngredientsTable.TABLE_NAME, null, null);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
 }

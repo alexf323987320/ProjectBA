@@ -2,31 +2,17 @@ package com.example.alex.bakingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.util.SparseArray;
-import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 
 import com.example.alex.bakingapp.json.RecipeJson;
-import com.example.alex.bakingapp.json.StepJson;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class StepActivity extends AppCompatActivity {
 

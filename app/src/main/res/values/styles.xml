@@ -17,10 +17,6 @@
 
     <style name="AppTheme.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/black_overlay</item>
-    </style>
-
     <style name="StepText" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textColor">@android:color/black</item>
         <item name="android:padding">@dimen/std_margin</item>

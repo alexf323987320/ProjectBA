@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.widget.RemoteViews;
@@ -22,7 +23,7 @@ import java.util.List;
  */
 public class IngredientsWidget extends AppWidgetProvider {
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    static void updateAppWidget(Context context, final AppWidgetManager appWidgetManager, final int appWidgetId) {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_ingredients);
@@ -63,7 +64,12 @@ public class IngredientsWidget extends AppWidgetProvider {
 
         // Instruct widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.list_lv);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.list_lv);
+            }
+        }, 1000);
     }
 
     @Override
